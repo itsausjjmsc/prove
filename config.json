@@ -1,9 +1,11 @@
 {
   "clientId": "04b0f920-318a-45d2-a8a4-50fde9d6e9d9",
+  "clientName": "Outlook Secure (Creation App)",
+  "authority": "https://login.microsoftonline.com/consumers",
   "scopes": [
     "Mail.ReadWrite",
     "Calendars.ReadWrite"
   ],
   "graphBaseUrl": "https://graph.microsoft.com/v1.0",
-  "authority": "https://login.microsoftonline.com/consumers"
+  "note": "Uses Microsoft's well-known SPA client ID (04b0f920-318a-45d2-a8a4-50fde9d6e9d9). No Azure AD tenant registration required for personal Microsoft accounts. The authority 'consumers' handles Outlook.com/Hotmail accounts."
 }
