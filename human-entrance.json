@@ -1,0 +1,86 @@
+{
+  "schema_version": "creation.human-entrance/1.0",
+  "project_id": "outlook-clean-shred",
+  "status": "conforming",
+  "super_tldr": "A local-first, privacy-respecting Outlook email and calendar security tool. Scan your messages and events for stale or sensitive items, preview security actions, and apply archiving, sensitivity labels, read-state changes, and calendar cleanup. No server, no sync, no cloud copy of your data.",
+  "human_purpose": "Help Mark secure his Outlook emails and calendar by finding old messages, bulk-archiving them into a secured folder, applying sensitivity labels (Private), marking messages as read, setting importance levels, removing follow-up flags, applying categories, and cleaning up stale calendar events by setting sensitivity, canceling old meetings, or updating show-as status. All actions are previewed before applying.",
+  "concept_entrances": [
+    "what this app does and does not do",
+    "how to connect your Outlook account",
+    "how security scan suggestions are generated",
+    "how to preview before applying security actions",
+    "how to archive emails to a secured folder",
+    "how to apply sensitivity labels to emails",
+    "how to mark messages as read in bulk",
+    "how to secure calendar events and cancel old meetings",
+    "data safety and privacy",
+    "how to fully disconnect"
+  ],
+  "reach": [
+    "Microsoft 365 / Outlook.com email",
+    "Microsoft 365 calendar",
+    "local browser storage for preferences",
+    "no server, no remote persistence"
+  ],
+  "authority": [
+    "the human authorizes every security action",
+    "no action is taken without explicit preview-and-confirm",
+    "access tokens stay in browser memory only",
+    "no data is sent anywhere except Microsoft Graph",
+    "Creation records tool lineage only, never your emails or calendar data"
+  ],
+  "privacy": [
+    "OAuth tokens are held in browser memory and session storage only",
+    "no telemetry, analytics, or remote logging",
+    "no server component stores or proxies your data",
+    "disconnecting clears all cached tokens and action log",
+    "all scanning and security actions run locally in your browser"
+  ],
+  "evidence_classes": [
+    "verified",
+    "reported",
+    "modeled",
+    "reflection",
+    "proposal",
+    "unknown",
+    "conflict"
+  ],
+  "permissions_used": [
+    "Mail.ReadWrite",
+    "Calendars.ReadWrite"
+  ],
+  "permissions_rationale": [
+    "Mail.ReadWrite is needed to list, read, move (archive), and update message properties (sensitivity, isRead, importance, categories, flag)",
+    "Calendars.ReadWrite is needed to list and update calendar events (sensitivity, showAs, cancellation)"
+  ],
+  "data_lifecycle": {
+    "ingress": "Microsoft Graph API via OAuth 2.0 authorization code flow with PKCE",
+    "storage": "In-memory only; access tokens cleared on disconnect or tab close",
+    "egress": "None — no data leaves the browser except API responses from Microsoft Graph",
+    "retention": "Tokens and preferences expire when the browser tab closes or the user disconnects",
+    "disposal": "Disconnect button purges all session state immediately"
+  },
+  "risks": [
+    "Canceling calendar meetings sends cancellation notices to attendees — only applies to meetings you organized",
+    "Sensitivity labels require Exchange/Office 365 to have them configured; the app falls back gracefully if not available",
+    "Large batch operations may hit Graph API throttling limits; the app retries with exponential backoff",
+    "Archived messages moved to the Secure Archive folder remain in your mailbox, not permanently deleted",
+    "Only your own mailbox and calendar are accessed; no other user's data is touched"
+  ],
+  "security_actions_supported": {
+    "email": [
+      "archive — move messages to a secured Secure Archive folder",
+      "markRead — set messages as read",
+      "sensitivity — set message sensitivity (normal, personal, private, confidential)",
+      "importance — set importance level (low, normal, high)",
+      "flag — clear or set follow-up flag",
+      "category — apply or remove categories"
+    ],
+    "calendar": [
+      "sensitivity — set event sensitivity",
+      "showAs — update free/busy status",
+      "cancel — cancel meetings you organized (sends notice to attendees)",
+      "category — apply categories to events"
+    ]
+  }
+}

@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>Outlook Secure</title>
+  <meta name="description" content="Secure your Outlook email and calendar. Archive old messages, find suspicious content, apply sensitivity labels, and clean up stale calendar events. Local-first, no server.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.webmanifest">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to security tools</a>
+  <header class="site-head">
+    <div>
+      <p class="eyebrow">Creation Outlook Toolkit</p>
+      <h1>Outlook Secure</h1>
+      <p class="lede">Secure your Outlook email and calendar — find suspicious content, archive old messages, apply sensitivity labels, and clean up stale events. Preview before acting.</p>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Security sections">
+    <button class="tab active" data-view="connect" aria-pressed="true">Connect</button>
+    <button class="tab" data-view="mail" aria-pressed="false">Email Security</button>
+    <button class="tab" data-view="calendar" aria-pressed="false">Calendar Security</button>
+    <button class="tab" data-view="logs" aria-pressed="false">Action Log</button>
+    <button class="tab" data-view="settings" aria-pressed="false">Settings</button>
+  </nav>
+
+  <main id="main">
+    <!-- Connect / Auth View -->
+    <section id="view-connect" class="view">
+      <div class="panel">
+        <h2>Connect your Outlook account</h2>
+        <p class="quiet">Sign in with your Microsoft account to grant this app secure access to your email and calendar. Your access token never leaves this browser tab. Disconnect at any time to purge all session data.</p>
+
+        <div id="authCard" class="auth-card">
+          <p id="authStatus">Click below to sign in with your Microsoft account and grant mail and calendar permissions.</p>
+          <button id="signInBtn" class="primary">Sign in with Microsoft</button>
+          <button id="disconnectBtn" class="block" hidden>Disconnect account</button>
+        </div>
+
+        <details class="security-info">
+          <summary><strong>Permissions requested</strong></summary>
+          <ul>
+            <li><code>Mail.ReadWrite</code> — read, archive (move), and update your emails (sensitivity, read status, importance, categories)</li>
+            <li><code>Calendars.ReadWrite</code> — read and update calendar events (sensitivity, show-as, cancellation)</li>
+          </ul>
+          <p class="quiet">These are the minimum permissions. The app only accesses your own mailbox. Review the <a href="human-entrance.json">human entrance</a> for full details.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- Email Security View -->
+    <section id="view-mail" class="view" hidden>
+      <div class="panel">
+        <h2>Email Security</h2>
+        <p class="quiet">Scan for suspicious/phishing content, find old messages to archive, or find large messages consuming space. Preview everything before applying security actions.</p>
+
+        <form id="scanForm">
+          <fieldset>
+            <legend>Scan type</legend>
+            <label class="choice"><input type="radio" name="scanType" value="suspicious" checked> Find suspicious/phishing messages</label>
+            <label class="choice"><input type="radio" name="scanType" value="old"> Find old messages to archive</label>
+            <label class="choice"><input type="radio" name="scanType" value="large"> Find large messages</label>
+          </fieldset>
+
+          <fieldset id="oldScanOptions">
+            <legend>Old message criteria</legend>
+            <label>
+              Older than
+              <select id="ageThreshold">
+                <option value="90">90 days</option>
+                <option value="180" selected>180 days</option>
+                <option value="365">1 year</option>
+                <option value="730">2 years</option>
+                <option value="1825">5 years</option>
+              </select>
+            </label>
+            <label>
+              Folder to scan
+              <select id="folderSelect">
+                <option value="inbox">Inbox</option>
+                <option value="sentitems">Sent Items</option>
+                <option value="deleteditems">Deleted Items</option>
+              </select>
+            </label>
+            <label>
+              From sender (optional, partial match)
+              <input id="fromFilter" type="text" placeholder="e.g. noreply@ or promotions@">
+            </label>
+          </fieldset>
+
+          <fieldset id="largeScanOptions">
+            <legend>Large message criteria</legend>
+            <label>
+              Minimum size (KB)
+              <input id="minSize" type="number" min="1" value="100" placeholder="messages larger than this">
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Security action to apply</legend>
+            <label class="choice"><input type="radio" name="mailAction" value="archive" checked> Archive (move to "Secure Archive" folder)</label>
+            <label class="choice"><input type="radio" name="mailAction" value="markRead"> Mark as read</label>
+            <label class="choice"><input type="radio" name="mailAction" value="sensitivity"> Set sensitivity: Private</label>
+            <label class="choice"><input type="radio" name="mailAction" value="category"> Apply category: "Secured"</label>
+          </fieldset>
+
+          <button type="submit" class="primary">Scan and preview</button>
+          <p id="scanStatus" class="status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <div class="panel">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Results</p>
+            <h2 id="resultsTitle">No scan yet</h2>
+          </div>
+          <button id="applyActionBtn" class="primary" hidden>Apply <span id="actionCount">0</span> actions</button>
+        </div>
+
+        <details id="previewPanel" hidden>
+          <summary>Preview before applying</summary>
+          <p class="quiet">Review this batch before applying. Archive = move to Secure Archive folder. Mark as read = no deletion.</p>
+          <div id="previewList" class="message-list"></div>
+          <button id="confirmApplyBtn" class="primary">Confirm apply</button>
+        </details>
+
+        <div id="resultsList" class="message-list"></div>
+        <p id="resultsSummary" class="quiet"></p>
+      </div>
+    </section>
+
+    <!-- Calendar Security View -->
+    <section id="view-calendar" class="view" hidden>
+      <div class="panel">
+        <h2>Calendar Security</h2>
+        <p class="quiet">Find stale or repeating calendar events. Update sensitivity, cancel old meetings you organized, or update free/busy status.</p>
+
+        <form id="calScanForm">
+          <fieldset>
+            <legend>Find events to secure</legend>
+            <label>
+              Events older than
+              <select id="calAgeThreshold">
+                <option value="90" selected>90 days</option>
+                <option value="180">180 days</option>
+                <option value="365">1 year</option>
+                <option value="730">2 years</option>
+              </select>
+            </label>
+            <label>
+              Event type
+              <select id="eventType">
+                <option value="past">Past events</option>
+                <option value="recurring">Repeating series</option>
+                <option value="all">All events</option>
+              </select>
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Security action</legend>
+            <label class="choice"><input type="radio" name="calAction" value="sensitivity" checked> Set sensitivity: Private</label>
+            <label class="choice"><input type="radio" name="calAction" value="showAs"> Set show-as: Free</label>
+            <label class="choice"><input type="radio" name="calAction" value="cancel"> Cancel meetings I organized</label>
+            <label class="choice"><input type="radio" name="calAction" value="category"> Apply category: "Historical"</label>
+          </fieldset>
+
+          <button type="submit" class="primary">Scan and preview</button>
+          <p id="calScanStatus" class="status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <div class="panel">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Calendar results</p>
+            <h2 id="calResultsTitle">No scan yet</h2>
+          </div>
+          <button id="applyCalActionBtn" class="primary" hidden>Apply <span id="calActionCount">0</span> actions</button>
+        </div>
+
+        <div id="calResultsList" class="event-list"></div>
+        <p id="calResultsSummary" class="quiet"></p>
+      </div>
+    </section>
+
+    <!-- Action Log View -->
+    <section id="view-logs" class="view" hidden>
+      <div class="panel">
+        <h2>Action Log</h2>
+        <p class="quiet">History of actions taken in this session. Cleared when you disconnect.</p>
+        <button id="clearLogBtn" class="secondary">Clear log</button>
+        <div id="logList" class="log-list"></div>
+      </div>
+    </section>
+
+    <!-- Settings View -->
+    <section id="view-settings" class="view" hidden>
+      <div class="panel">
+        <h2>Settings</h2>
+        <form id="settingsForm">
+          <label>
+            <input id="showPreviews" type="checkbox" checked>
+            Show preview panel before applying actions
+          </label>
+          <label>
+            <input id="autoArchiveFolder" type="checkbox" checked>
+            Create "Secure Archive" folder automatically on first archive
+          </label>
+          <label>
+            <input id="suspiciousAutoFlag" type="checkbox">
+            Auto-flag suspicious messages as low importance (don't auto-archive)
+          </label>
+          <label>
+            <input id="batchSize" type="number" min="1" max="20" value="20">
+            Batch size for API calls (max 20 per Graph batch limit)
+          </label>
+          <button class="secondary" type="reset">Reset to defaults</button>
+          <button class="primary" type="submit">Save settings</button>
+        </form>
+        <p id="settingsStatus" class="status" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p><strong>Privacy first.</strong> Your access tokens stay in browser memory only. No server ever sees your emails or calendar data. Disconnect at any time to purge all session state.</p>
+    <p class="small">Creation Outlook toolkit &middot; local-first &middot; powered by Microsoft Graph API</p>
+  </footer>
+
+  <script src="https://alcdn.msauth.net/browser/4.20.1/js/msal-browser.js"></script>
+  <script type="module" src="app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "Outlook Secure",
+  "short_name": "Outlook Secure",
+  "description": "Local-first Outlook email and calendar security tool. Archive, label, mark read, and clean up — all with preview.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f6f3fb",
+  "theme_color": "#284f3d",
+  "icons": []
+}
